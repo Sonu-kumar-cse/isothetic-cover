@@ -38,9 +38,13 @@ int main()
     int grid_size;
     cin>>grid_size;
   
+    cout<<"image with grid points"<<endl;
     
 
     make_boundary(image,total_rows,total_columns,rectangle,grid_size);
+
+    getchar();
+    system("clear");
 
     print_image(image,total_rows,total_columns,rectangle,grid_size-1);
 

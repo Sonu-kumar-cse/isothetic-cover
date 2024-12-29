@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include <cstdlib>
 #include "helper_functions/print_o_cover.cpp"
 using namespace std;
 
@@ -214,12 +215,12 @@ void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > 
     system("clear");
     print_image_cover(image,n,m,rect,grid_size);
 
-    cout<<endl<<curr_p<<" "<<curr_q<<" to "<<next_p<<" "<<next_q <<" direction="<<direction<<" ";
-    for(int i=0;i<4;i++)
-    {
-        cout<<ugb_occ1[i];
-    }
-    cout<<endl;
+    // cout<<endl<<curr_p<<" "<<curr_q<<" to "<<next_p<<" "<<next_q <<" direction="<<direction<<" ";
+    // for(int i=0;i<4;i++)
+    // {
+    //     cout<<ugb_occ1[i];
+    // }
+    // cout<<endl;
 
     curr_p=next_p;
     curr_q=next_q;
@@ -241,12 +242,12 @@ void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > 
         else next_p+=grid_size;
     
         
-        cout<<endl<<curr_p<<" "<<curr_q<<" to "<<next_p<<" "<<next_q <<" direction="<<direction<<" ";
-        for(int i=0;i<4;i++)
-        {
-            cout<<ugb_occ[i];
-        }
-        cout<<endl;
+        // cout<<endl<<curr_p<<" "<<curr_q<<" to "<<next_p<<" "<<next_q <<" direction="<<direction<<" ";
+        // for(int i=0;i<4;i++)
+        // {
+        //     cout<<ugb_occ[i];
+        // }
+        // cout<<endl;
 
         change_image_cover(image,curr_p,curr_q,next_p,next_q);
         getchar();
