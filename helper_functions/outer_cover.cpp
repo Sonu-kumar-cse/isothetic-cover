@@ -1,7 +1,8 @@
 #include<iostream>
 #include<vector>
 #include <cstdlib>
-#include "helper_functions/print_o_cover.cpp"
+#include<utility>
+#include "print_o_cover.cpp"
 using namespace std;
 
 
@@ -192,7 +193,7 @@ void change_image_cover(vector<vector<int> > &image,int p,int q,int m,int n)
 }
 
 
-void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > &rect,int grid_size,vector<vector<bool> > &visited,int p,int q,int first_row,int first_col,vector<vector<int> > ocover)
+void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > &rect,int grid_size,vector<vector<bool> > &visited,int p,int q,int first_row,int first_col,vector<vector<pair<int,int> > > &ocover)
 {
     int direction=2;
     visited[(p-first_row)/grid_size][(q-first_col)/grid_size]=true;
@@ -200,10 +201,16 @@ void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > 
     int curr_p=p;
     int curr_q=q;
     int type=get_type(ugb_occ1);
+    bool o_hole_flag=false;
+    if(type==-1){
+        o_hole_flag=true;
+    }
     int next_p,next_q;
     next_p=p;
     next_q=q;
     
+    vector<pair<int,int> > temp_variable;
+    if(o_hole_flag) type*=-1;
     direction=(direction+type)%4;
     if(direction==0) next_q+=grid_size;
     else if(direction==1) next_p-=grid_size;
@@ -222,6 +229,7 @@ void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > 
     // }
     // cout<<endl;
 
+    temp_variable.push_back(make_pair(curr_p,curr_q));
     curr_p=next_p;
     curr_q=next_q;
     
@@ -234,7 +242,7 @@ void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > 
       
         next_p=curr_p;
         next_q=curr_q;
-
+        if(o_hole_flag) type*=-1;
         direction=(direction+type)%4;
         if(direction==0) next_q+=grid_size;
         else if(direction==1) next_p-=grid_size;
@@ -256,15 +264,17 @@ void start_tracing(vector<vector<int> > &image,int n,int m,vector<vector<int> > 
 
         curr_p=next_p;
         curr_q=next_q;
+        temp_variable.push_back(make_pair(curr_p,curr_q));
 
     }
+    ocover.push_back(temp_variable);
 
 
 }
 
-vector<vector<int> > get_outer_cover(vector<vector<int> > &image,int n,int m,vector<vector<int> > &rect,int grid_size)
+vector<vector<pair<int,int> > > get_outer_cover(vector<vector<int> > &image,int n,int m,vector<vector<int> > &rect,int grid_size)
 {
-    vector<vector<int> > ocover;
+    vector<vector<pair<int,int> > > ocover;
     
     int tototal_grid_rows=(rect[1][0]-rect[0][0])/grid_size +1;
     int tototal_grid_cols=(rect[1][1]-rect[0][1])/grid_size +1;
@@ -292,13 +302,13 @@ vector<vector<int> > get_outer_cover(vector<vector<int> > &image,int n,int m,vec
                 if(count==0 || count==4)continue;
                 else{
                     start_tracing(image,n,m,rect,grid_size,visited,(i*grid_size)+first_row,(j*grid_size)+first_col,first_row,first_col,ocover);
-                    goto label;
+                    
                 }
             }
 
         }
     }
-    label:
+    
     return ocover;
 
 }

@@ -35,6 +35,7 @@ void print_simple_image(vector<vector<int> > &image,int n,int m)
             
             if(image[i][j]==0)
                 cout<<"\033[31m"<<image[i][j]<<"\033[0m";
+            else if(image[i][j]==4) cout<<"\033[34m"<<image[i][j]<<"\033[0m";
             else
                 cout<<image[i][j];
         }
