@@ -146,7 +146,7 @@ void readBMP(const string& filePath) {
 
 int main() {
 
-    string filePath = "inputs/leaf.bmp";
+    string filePath = "inputs/cherry.bmp";
     if(!createEmptyBMP(filePath,"outputs/output.bmp"))
     {
         cout<<"someting wrong";

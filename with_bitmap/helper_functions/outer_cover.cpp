@@ -352,14 +352,19 @@ void trace_o_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int offset,
     curr_j=next_j;
     // std::cout<<curr_i<<" "<<curr_j<<std::endl;
     
+
     while(!(curr_i==i && curr_j==j))
     {
+        
         markVisited(output_bmp,offset,curr_i,curr_j,grid_size,rect,rowsize,height,width);
         std::vector<bool> ugb_occ=get_ugb_occ(input_bmp,offset,curr_i,curr_j,grid_size,rect,rowsize,height,width);
         type=getType(ugb_occ);
         // std::cout<<direction<<" "<<type<<std::endl;
 
-        if(is_hole) type*=-1;
+        if(is_hole) {
+            
+            type*=-1;
+        }
         direction=(direction+type)%4;
         if(direction==-1)direction=3;
         if(direction==0) next_j+=grid_size;
@@ -417,7 +422,7 @@ void create_outer_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int of
 {
     int m=rect[3]-rect[1]+1;
     int n=rect[2]-rect[0]+1;
-    int t=2;
+    
     for(int i=0;i<m;i+=grid_size)
     {
         for(int j=0;j<n;j+=grid_size)
@@ -426,10 +431,10 @@ void create_outer_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int of
             { 
                 std::vector<bool> ugb_occ=get_ugb_occ(input_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
                 int type=getType(ugb_occ);
+                
                 if(type==1 || type==-1)
                 {
                     
-                    std::cout<<"inside  ";
                     for(int ugb_i=0;ugb_i<ugb_occ.size();ugb_i++)std::cout<<ugb_occ[ugb_i]<< " ";
                     std::cout<<std::endl;
                     std::cout<<type<<std::endl;
@@ -440,9 +445,12 @@ void create_outer_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int of
                 markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
                 
             }
+            // markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
         }
     }
     //clear blue lines
     clearBlueLines(input_bmp,output_bmp,offset,rect,rowsize,height,width,grid_size);
+    
+
     return;
 }
