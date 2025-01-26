@@ -44,17 +44,22 @@ bool checkIsvisited(std::fstream &output_bmp,int offset,int i,int j,int grid_siz
     int green=(int)color_rgb[1];
     int red=(int)color_rgb[2];
 
-    if(blue==255 && green==0 && red==0) return true;
+    if((blue==255 && green==0 && red==0) || (blue==0 && green==1 && red==0)) return true;
 
     return false;
 }
 
-void markVisited(std::fstream &output_bmp,int offset,int i,int j,int grid_size,std::vector<int> &rect,int rowsize,int height,int width)
+void markVisited(std::fstream &output_bmp,int offset,int i,int j,int grid_size,std::vector<int> &rect,int rowsize,int height,int width,bool flag=false)
 {
     std::vector<u_int8_t> color_rgb(3);
     color_rgb[0]=255;
     color_rgb[1]=0;
     color_rgb[2]=0;
+    if(flag)
+    {
+        color_rgb[0]=0;
+        color_rgb[1]=1;
+    }
     setcolor_rgb(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width,color_rgb);
 }
 
@@ -65,8 +70,15 @@ int getType(std::vector<bool> ugb_occ)
     {
         if(ugb_occ[i]) count++;
     }
-    if(count==1) return 1;
-    if(count==3) return -1;
+    if(count==1) {
+        if(ugb_occ[3]) return 2;
+        return 1;
+    }
+
+    if(count==3){
+        if(!ugb_occ[3]) return 3;
+        return -1;
+    }
     if(count==4) return 0;
     if((ugb_occ[0] && ugb_occ[2]) || (ugb_occ[1] && ugb_occ[3])) return -1;
     return 0;
@@ -326,12 +338,12 @@ std::vector<bool> get_ugb_occ(std::ifstream &input_bmp,int offset,int i,int j,in
 
 void trace_o_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int offset,int i,int j,std::vector<int> &rect,int rowsize,int height,int width,int grid_size,int type)
 {
-    markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
-    int direction=2;
-    bool is_hole=false;
-    if(type==-1) 
+    markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width,true);
+    int direction=3;
+    
+    if(type==3) 
     {
-        is_hole=true;
+        direction=0;
     }
     int curr_i=i;
     int curr_j=j;
@@ -339,9 +351,7 @@ void trace_o_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int offset,
 
     std::cout<<curr_i<<" "<<curr_j<<std::endl;
 
-    if(is_hole) type*=-1;
 
-    direction=(direction+type)%4;
     std::cout<<direction<<" "<<type<<std::endl;
     if(direction==0) next_j+=grid_size;
     else if(direction==1) next_i-=grid_size;
@@ -352,18 +362,27 @@ void trace_o_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int offset,
     curr_j=next_j;
     // std::cout<<curr_i<<" "<<curr_j<<std::endl;
     
-
+    int x=5;
+    bool flag=false;
+    if(type==3)
+    {
+        cout<<"type 3 detected";
+        flag=true;
+    }
     while(!(curr_i==i && curr_j==j))
     {
-        
-        markVisited(output_bmp,offset,curr_i,curr_j,grid_size,rect,rowsize,height,width);
+       
+        markVisited(output_bmp,offset,curr_i,curr_j,grid_size,rect,rowsize,height,width,true);
         std::vector<bool> ugb_occ=get_ugb_occ(input_bmp,offset,curr_i,curr_j,grid_size,rect,rowsize,height,width);
         type=getType(ugb_occ);
         // std::cout<<direction<<" "<<type<<std::endl;
-
-        if(is_hole) {
-            
-            type*=-1;
+        
+        if(type==3) {
+            type=-1;
+        }
+        if(type==2)
+        {
+            type=1;
         }
         direction=(direction+type)%4;
         if(direction==-1)direction=3;
@@ -394,22 +413,15 @@ void clearBlueLines(std::ifstream &input_bmp,std::fstream &output_bmp,int offset
         {
             if(checkIsvisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width))
             {   
-                
+                std::vector<u_int8_t> get_col(3);
+                get_col=getDataO(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
+                if(!(get_col[0]==255 && get_col[1]==0 && get_col[2]==0)) continue;
                 std::vector<u_int8_t> color_rgb(3);
                 color_rgb[0]=255;
                 color_rgb[1]=255;
                 color_rgb[2]=255;
                 
-                std::vector<u_int8_t> color_rgb_left=getDataO(output_bmp,offset,i,j-1,grid_size,rect,rowsize,height,width);
-                std::vector<u_int8_t> color_rgb_right=getDataO(output_bmp,offset,i,j+1,grid_size,rect,rowsize,height,width);
-                std::vector<u_int8_t> color_rgb_top=getDataO(output_bmp,offset,i-1,j,grid_size,rect,rowsize,height,width);
-                std::vector<u_int8_t> color_rgb_bottom=getDataO(output_bmp,offset,i+1,j,grid_size,rect,rowsize,height,width);
-                if((color_rgb_left[0]==0 && color_rgb_left[1]==0 && color_rgb_left[2]==0) || (color_rgb_right[0]==0 && color_rgb_right[1]==0 && color_rgb_right[2]==0)  ||  (color_rgb_top[0]==0 && color_rgb_top[1]==0 && color_rgb_top[2]==0) || (color_rgb_bottom[0]==0 && color_rgb_bottom[1]==0 && color_rgb_bottom[2]==0))
-                {
-                    color_rgb[0]=0;
-                    color_rgb[1]=0;
-                    color_rgb[2]=0;
-                }
+                
                 setcolor_rgb(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width,color_rgb);
             }
         }
@@ -420,8 +432,8 @@ void clearBlueLines(std::ifstream &input_bmp,std::fstream &output_bmp,int offset
 
 void create_outer_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int offset,std::vector<int> &rect,int rowsize,int height,int width,int grid_size)
 {
-    int m=rect[3]-rect[1]+1;
-    int n=rect[2]-rect[0]+1;
+    int m=rect[3]-rect[1];
+    int n=rect[2]-rect[0];
     
     for(int i=0;i<m;i+=grid_size)
     {
@@ -429,10 +441,11 @@ void create_outer_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int of
         {
             if(!checkIsvisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width))
             { 
+                markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
                 std::vector<bool> ugb_occ=get_ugb_occ(input_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
                 int type=getType(ugb_occ);
                 
-                if(type==1 || type==-1)
+                if(type==2 || type==3)
                 {
                     
                     for(int ugb_i=0;ugb_i<ugb_occ.size();ugb_i++)std::cout<<ugb_occ[ugb_i]<< " ";
@@ -442,15 +455,14 @@ void create_outer_cover(std::ifstream &input_bmp,std::fstream &output_bmp,int of
                     
                    
                 }
-                markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
+                
                 
             }
-            // markVisited(output_bmp,offset,i,j,grid_size,rect,rowsize,height,width);
+            
         }
     }
     //clear blue lines
     clearBlueLines(input_bmp,output_bmp,offset,rect,rowsize,height,width,grid_size);
     
-
     return;
 }

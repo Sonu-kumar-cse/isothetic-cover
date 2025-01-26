@@ -146,7 +146,9 @@ void readBMP(const string& filePath) {
 
 int main() {
 
-    string filePath = "inputs/cherry.bmp";
+    string filePath="inputs/many_obj.bmp";
+    // cout<<"enter input path:";
+    // cin>>filePath;
     if(!createEmptyBMP(filePath,"outputs/output.bmp"))
     {
         cout<<"someting wrong";
@@ -179,7 +181,7 @@ int main() {
 
     int grid_size;
     cout<<"enter grid size:";
-    grid_size--;
+    
     cin>>grid_size;
     
     int height=(int)infoHeader_input.height;
